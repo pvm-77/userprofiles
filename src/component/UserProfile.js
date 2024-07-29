@@ -4,7 +4,7 @@ const UserProfile = ({ user }) => {
   
     }
     return (
-      <div className='flex justify-center mb-4 w-full'>
+      <div className='flex justify-center mb-4 w-full sticky top-0'>
   
         <div className='flex border-2 bg-black text-white p-4 border-violet-800  lg:w-2/4 w-full'>
           <div className='user-image pr-2'>

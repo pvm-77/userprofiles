@@ -1,68 +1,59 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import './App.css';
+import { fetchUsers } from './services/users';
 import UserProfile from './component/UserProfile';
+import Card from './component/Card';
+import ErrorMessage from './component/ErrorMessage';
 
-
-
-const Card = ({ user,isSelected,onClick }) => {
-  return (
-    <div onClick={onClick} className={`bg-black text-white hover:cursor-pointer shadow-lg rounded-lg p-4 ${isSelected ? 'border-2 border-violet-800' : 'border-2 border-transparent'}`}  >
-      <div className='card-item card-gender'>
-        <p style={{ marginRight: '2px' }}>{user.gender}</p>
-        <p>{user.nat}</p>
-      </div>
-      <div className='card-item card-user-name'>
-        <p>{user.name.title} {user.name.first} {user.name.last}</p>
-
-      </div>
-      <div className='card-item card-user-email'>
-        <p>{user.email}</p>
-      </div>
-
-    </div>
-  )
-}
-
+import Loader from './component/Loader';
+import UsersList from './component/UsersList';
 function App() {
-  const [userdata, setUserData] = useState([]);
+
+
+  const [users, setUsers] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null)
 
   const [selectedUser, setSelectedUser] = useState(null);
-
   useEffect(() => {
-    try {
-      axios.get('https://randomuser.me/api/?inc=gender,name,nat,location,picture,email&results=%2020')
-        .then(r => {
-          console.log(r.data.results)
-          setUserData(r.data.results)
-          setSelectedUser(r.data.results[0])
-        }).catch(e => console.error(e))
+    const loadUsers = async () => {
+      try {
+        const usersList = await fetchUsers();
+        setUsers(usersList);
 
+        if (usersList.length > 0) {
+          setSelectedUser(usersList[0]);
+          setLoading(false)
+        }
+      } catch (error) {
+        setError(error.message)
 
-    } catch (error) {
-      console.error('error is ', error);
-
+      }
     }
+    loadUsers();
   }, [])
-  const handleClick=(user)=>{
-    console.log('the user to be selected:',user)
+
+
+  const handleClick = (user) => {
+    console.log('the user to be selected:', user)
     setSelectedUser(user)
   }
 
 
-
+  if (loading) {
+    return (
+      <>
+        <Loader />
+      </>
+    )
+  }
+  if (error) {
+    return (<ErrorMessage errorMessage={error} />)
+  }
   return (
-    <div className=' flex-col m-4 p-4' >
-
+    <div className=' flex-col m-2 ' >
       <UserProfile user={selectedUser} />
-
-      <div className=' flex flex-wrap -mx-2'>
-
-        {
-          userdata.map((user) => (<div key={user.email} className="w-full md:w-1/2 lg:w-1/4 px-2 mb-4">
-            <Card user={user} isSelected={user===selectedUser} onClick={()=>handleClick(user)} key={user.email} /></div>))
-        }
-      </div>
+      <UsersList users={users} selectedUser={selectedUser} handleClick={handleClick} />
     </div>
   );
 }

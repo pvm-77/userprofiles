@@ -1,8 +1,12 @@
-import React, { Children } from 'react'
+import Card from "./Card"
 
-const UsersList = () => {
+
+const UsersList = ({users,selectedUser,handleClick}) => {
   return (
-    <div></div>
+    <div className="flex flex-wrap  justify-center">
+      {users?.map((user)=><Card user={user} isSelected={user === selectedUser} onClick={() => handleClick(user)} key={user.email} />)}
+      
+    </div>
   )
 }
 
